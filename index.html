@@ -3,1097 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHRBRK // MASTER DASHBOARD v9 - ULTIMATE</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        kick: '#53FC18',
-                    },
-                    screens: {
-                        'xs': '475px',
-                    }
-                }
-            }
-        }
-    </script>
-
+    <title>SHRBRK Random TV</title>
     <style>
-        :root {
-            --bg-body: #09090b;
-            --bg-card: #121214;
-            --border: #27272a;
-            --text-main: #e4e4e7;
-            --text-muted: #a1a1aa;
-            
-            /* Platform Colors */
-            --yt-red: #ff0000;
-            --tt-cyan: #25F4EE;
-            --tt-pink: #FE2C55;
+        /* --- GENEL TASARIM --- */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #0d0d0d;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
         }
 
-        /* LIGHT MODE VARIABLES */
-        .light-mode {
-            --bg-body: #f4f4f5;
-            --bg-card: #ffffff;
-            --border: #e4e4e7;
-            --text-main: #18181b;
-            --text-muted: #52525b;
+        /* --- VİDEO ALANI --- */
+        #video-container {
+            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1;
+        }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* --- YÜKLENİYOR EKRANI (Loading) --- */
+        #loading-screen {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: #000;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 10; /* Videonun üstünde */
+            transition: opacity 0.5s ease;
         }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-            overflow-x: hidden;
-        }
-
-        /* HERO SECTION */
-        .hero-bg {
-            background-image: linear-gradient(to bottom, rgba(9,9,11,0.3), var(--bg-body)), url('https://static-cdn.jtvnw.net/jtv_user_pictures/56b28f37-7bc8-46b4-a9ed-6ecfd74cf29e-profile_banner-480.jpeg');
-            background-size: cover;
-            background-position: center top;
-            background-attachment: fixed; /* Mobilde bazen sorun çıkarır ama modern tarayıcılarda iyidir */
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            z-index: 10;
-            padding-top: 80px; /* Mobil header payı */
-            padding-bottom: 80px;
-        }
-
-        @media (max-width: 768px) {
-            .hero-bg {
-                background-attachment: scroll; /* Mobilde scroll performansını artırır */
-                background-position: center center;
-            }
-        }
-
-        .hero-content {
-            z-index: 20;
-            text-align: center;
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        /* CARD STYLES */
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s, border-color 0.3s;
-        }
-        
-        .yt-theme .card:hover { box-shadow: 0 0 15px rgba(255, 0, 0, 0.1); border-color: #3f1a1a; }
-        .tt-theme .card:hover { box-shadow: 0 0 15px rgba(37, 244, 238, 0.1); border-color: #1a3f3d; }
-        .ig-theme .card:hover { box-shadow: 0 0 20px rgba(188, 24, 136, 0.2); border-color: #3f1a33; }
-
-        .text-gradient-ig {
-            background: -webkit-linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        /* NAVIGATION CARDS IN HERO */
-        .nav-card {
-            backdrop-filter: blur(10px);
-            background: rgba(18, 18, 20, 0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .light-mode .nav-card {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        .nav-card:hover { transform: translateY(-5px); background: rgba(18, 18, 20, 0.9); }
-        .light-mode .nav-card:hover { background: rgba(255, 255, 255, 0.95); }
-
-        /* DROPDOWNS */
-        .dropdown-menu {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: all 0.2s;
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%) translateY(10px);
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px;
-            min-width: 160px;
-            z-index: 50;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .group:hover .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* UTILS */
-        .section-divider {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin: 60px 0 30px 0;
-            color: var(--text-muted);
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-        .section-divider::before, .section-divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-        
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-        .card-title { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.8px; }
-        
-        .hacker-text { font-family: 'JetBrains Mono', monospace; }
-        
-        .btn-group button {
-            background: transparent; border: 1px solid var(--border); color: var(--text-muted);
-            font-size: 11px; padding: 4px 10px; cursor: pointer; transition: all 0.2s;
-        }
-        .btn-group button:first-child { border-radius: 6px 0 0 6px; }
-        .btn-group button:last-child { border-radius: 0 6px 6px 0; }
-        .yt-theme .btn-group button.active { background: var(--yt-red); color: #fff; border-color: var(--yt-red); }
-
-        .progress-bg { background: #27272a; height: 8px; border-radius: 4px; width: 100%; overflow: hidden; }
-        .progress-fill-yt { height: 100%; background: #f59e0b; }
-        .progress-fill-tt { height: 100%; background: linear-gradient(90deg, var(--tt-cyan), var(--tt-pink)); }
-
-        /* --- YENİ EFEKTLER --- */
-
-        /* TikTok Chromatic Shake Effect */
-        @keyframes chromatic-shake {
-            0% { text-shadow: 2px 2px 0px #FE2C55, -2px -2px 0px #25F4EE; transform: translate(1px, 1px); }
-            20% { text-shadow: -2px 2px 0px #FE2C55, 2px -2px 0px #25F4EE; transform: translate(-1px, 0px); }
-            40% { text-shadow: 2px -2px 0px #FE2C55, -2px 2px 0px #25F4EE; transform: translate(0px, -1px); }
-            60% { text-shadow: -2px -2px 0px #FE2C55, 2px 2px 0px #25F4EE; transform: translate(0px, 1px); }
-            80% { text-shadow: 2px 2px 0px #FE2C55, -2px -2px 0px #25F4EE; transform: translate(1px, 0px); }
-            100% { text-shadow: 0px 0px 0px #FE2C55, 0px 0px 0px #25F4EE; transform: translate(0px, 0px); }
-        }
-
-        .tt-effect {
-            transition: all 0.1s;
-            position: relative;
-            display: inline-block;
-        }
-
-        .tt-effect:hover {
-            animation: chromatic-shake 0.4s ease-in-out infinite;
+        .flash-text {
+            font-size: 32px;
+            font-weight: 900;
             color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: blink 0.5s infinite alternate;
+            text-shadow: 0 0 20px rgba(145, 71, 255, 0.8); /* Twitch Moru Glow */
         }
 
-        /* Instagram Glow & Grow Effect */
-        .ig-magical {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-origin: left;
+        @keyframes blink {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.4; transform: scale(0.98); }
         }
 
-        .ig-magical:hover {
-            transform: scale(1.15) translateX(5px);
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(220, 39, 67, 0.6));
-            letter-spacing: 1px;
-            cursor: default;
+        /* --- BUTON TASARIMI --- */
+        #random-btn {
+            position: absolute; bottom: 30px; right: 30px;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #9146FF, #53fc18); /* Twitch Moru + Kick Yeşili */
+            color: #000;
+            border: none; border-radius: 50px;
+            font-weight: 900; font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            z-index: 20;
+            text-transform: uppercase;
         }
-
-        .card-hover-highlight:hover {
-            border-color: #52525b;
-            background: var(--bg-card);
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-            transform: translateY(-2px);
+        #random-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(83, 252, 24, 0.4);
         }
-
-        /* Custom Scrollbar for divs */
-        .custom-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #3f3f46;
-            border-radius: 4px;
-        }
+        #random-btn:active { transform: translateY(1px); }
 
     </style>
 </head>
-<body class="antialiased">
+<body>
 
-    <button onclick="toggleTheme()" class="fixed top-6 right-6 z-50 w-10 h-10 rounded-full bg-zinc-800/80 backdrop-blur border border-zinc-700 text-white flex items-center justify-center hover:bg-zinc-700 transition shadow-lg">
-        <i class="fas fa-sun" id="themeIcon"></i>
-    </button>
-
-    <section id="hero" class="hero-bg">
-        <div class="hero-content px-4">
-            <h1 onclick="scrollToTop()" class="text-6xl md:text-9xl font-black tracking-tighter cursor-pointer hover:scale-105 transition-transform duration-300 drop-shadow-2xl mb-4" style="font-family: 'Inter', sans-serif;">
-                SHRBRK
-            </h1>
-            
-            <div class="flex flex-wrap justify-center items-center gap-4 mt-8">
-                
-                <div class="relative group">
-                    <button class="bg-gradient-to-tr from-orange-500 to-pink-600 text-white px-6 py-3 rounded-full font-bold text-sm md:text-base hover:shadow-lg hover:shadow-pink-500/30 transition-all flex items-center gap-2">
-                        <i class="fab fa-instagram"></i> Instagram <i class="fas fa-chevron-down text-xs ml-1"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="https://www.instagram.com/shrbrkofficial/" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded mb-1">OFFICIAL</a>
-                        <a href="https://www.instagram.com/seherozden/" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded mb-1">SEHER</a>
-                        <a href="https://www.instagram.com/burakseymenn/" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded">BURAK</a>
-                    </div>
-                </div>
-
-                <div class="relative group">
-                    <button class="bg-red-600 text-white px-6 py-3 rounded-full font-bold text-sm md:text-base hover:shadow-lg hover:shadow-red-600/30 transition-all flex items-center gap-2">
-                        <i class="fab fa-youtube"></i> YouTube <i class="fas fa-chevron-down text-xs ml-1"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="https://www.youtube.com/@SHRBRK" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded mb-1">MAIN</a>
-                        <a href="https://www.youtube.com/@SHRBRKKesit" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded">KESITLER</a>
-                    </div>
-                </div>
-
-                <a href="https://www.tiktok.com/@shrbrktw" class="bg-black border border-zinc-700 text-white px-6 py-3 rounded-full font-bold text-sm md:text-base hover:bg-zinc-900 transition-all flex items-center gap-2 hover:shadow-[2px_2px_0px_#25F4EE,-2px_-2px_0px_#FE2C55]">
-                    <i class="fab fa-tiktok"></i> TikTok
-                </a>
-
-                <a href="https://kick.com/shrbrk" class="bg-kick text-black px-6 py-3 rounded-full font-bold text-sm md:text-base hover:bg-[#42ce12] transition-all flex items-center gap-2 hover:shadow-[0_0_15px_rgba(83,252,24,0.4)]">
-                    <i class="fas fa-video"></i> Kick
-                </a>
-
-                <a href="mailto:shrbrk@outlook.com" class="bg-zinc-100 text-black px-6 py-3 rounded-full font-bold text-sm md:text-base hover:bg-white transition-all flex items-center gap-2">
-                    <i class="fas fa-envelope"></i> Mail
-                </a>
-
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 max-w-4xl mx-auto px-4">
-                <div onclick="smoothScroll('youtube-section')" class="nav-card p-6 md:p-8 rounded-xl text-left group">
-                    <div class="text-red-500 text-4xl mb-4 group-hover:scale-110 transition-transform origin-left"><i class="fab fa-youtube"></i></div>
-                    <div class="text-white font-bold text-xl md:text-2xl">YouTube Raporu</div>
-                    <div class="text-zinc-400 text-sm mt-1">İzlenme, Beğeni ve Kitle</div>
-                </div>
-                <div onclick="smoothScroll('tiktok-section')" class="nav-card p-6 md:p-8 rounded-xl text-left group">
-                    <div class="flex gap-1 text-4xl mb-4 group-hover:scale-110 transition-transform origin-left">
-                        <span class="text-[#25F4EE]"><i class="fas fa-music"></i></span>
-                    </div>
-                    <div class="text-white font-bold text-xl md:text-2xl">TikTok Merkezi</div>
-                    <div class="text-zinc-400 text-sm mt-1">Viral takibi ve yaş dağılımı</div>
-                </div>
-                <div onclick="smoothScroll('instagram-section')" class="nav-card p-6 md:p-8 rounded-xl text-left group">
-                    <div class="text-transparent bg-clip-text bg-gradient-to-tr from-yellow-500 to-purple-600 text-4xl mb-4 font-bold group-hover:scale-110 transition-transform origin-left"><i class="fab fa-instagram"></i></div>
-                    <div class="text-white font-bold text-xl md:text-2xl">Instagram Verileri</div>
-                    <div class="text-zinc-400 text-sm mt-1">Reels etkileşimi ve büyüme</div>
-                </div>
-            </div>
-            
-            <div class="mt-16 animate-bounce text-zinc-400 text-2xl">
-                <i class="fas fa-chevron-down"></i>
-            </div>
-        </div>
-    </section>
-
-    <div id="info-section" class="max-w-[1600px] mx-auto px-4 md:px-8 mt-12 mb-12">
-        <div class="flex flex-col gap-10"> <div class="card card-hover-highlight w-full !p-8 md:!p-10">
-                <div class="card-header !mb-6 !pb-4">
-                    <div class="card-title text-white text-lg md:text-xl"><i class="fas fa-user-astronaut text-kick"></i> HAKKINDA</div>
-                </div>
-                <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
-                    <div class="relative group cursor-pointer flex-shrink-0">
-                        <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-zinc-700 group-hover:border-kick transition-all duration-300 shadow-2xl">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTT1U17LW7ddSQYm_yclehwH0wj-xRmustgpA&s" alt="Avatar" class="w-full h-full object-cover">
-                        </div>
-                        <div class="absolute bottom-0 right-0 bg-kick text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg transform translate-y-2">CANLI</div>
-                    </div>
-                    <div class="flex-1 space-y-4 text-center md:text-left">
-                        <h3 class="text-3xl font-black text-white tracking-tight"> <span class="text-kick">SHRBRK</span>.</h3>
-                        <p class="text-base md:text-lg text-zinc-300 leading-relaxed font-light">
-                            Biz Seher ve Burak. Kısaca SHRBRK. Farklı platformlarda olmak üzere yaklaşık 4 senedir yayın açıyoruz. Seher, Yüksek Lisansını bitirmiş ve YÜKSEK İÇ MİMAR unvanını alan 28 yaşında zorba birisi. Burak, Yüksek Lisansını bitirememiş ve YÜKSEK Beden Eğitimi Öğretmeni unvanını alamamış 30 yaşında zorbalanan birisi.
-                        </p>
-                        <div class="flex flex-wrap gap-3 mt-4 justify-center md:justify-start">
-                            <span class="px-3 py-1.5 bg-zinc-800 rounded text-xs md:text-sm text-zinc-300 border border-zinc-700 hover:bg-zinc-700 transition">#Valorant</span>
-                            <span class="px-3 py-1.5 bg-zinc-800 rounded text-xs md:text-sm text-zinc-300 border border-zinc-700 hover:bg-zinc-700 transition">#Radyant</span>
-                            <span class="px-3 py-1.5 bg-zinc-800 rounded text-xs md:text-sm text-zinc-300 border border-zinc-700 hover:bg-zinc-700 transition">#Eğlence</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card card-hover-highlight w-full !p-8 md:!p-10">
-                <div class="card-header !mb-6 !pb-4">
-                    <div class="card-title text-white text-lg md:text-xl"><i class="fas fa-calendar-alt text-purple-500"></i> YAYIN PROGRAMI</div>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    
-                    <div class="bg-zinc-900/50 p-4 md:p-6 rounded-xl border border-zinc-800 text-center hover:bg-zinc-800 transition group h-full flex flex-col justify-center">
-                        <div class="text-xs md:text-sm text-zinc-500 font-bold mb-2 group-hover:text-white">PAZARTESİ</div>
-						<div class="text-[10px] md:text-xs text-kick font-bold">KICK</div>
-                        <div class="text-white font-black text-base md:text-lg my-1">21:00-03:00</div>
-                        <div class="text-[10px] md:text-xs text-zinc-400">BİG5 - VALORANT</div>
-                    </div>
-
-                    <div class="bg-zinc-900/50 p-4 md:p-6 rounded-xl border border-zinc-800 text-center hover:bg-zinc-800 transition group h-full flex flex-col justify-center">
-                        <div class="text-xs md:text-sm text-zinc-500 font-bold mb-2 group-hover:text-white">ÇARŞAMBA</div>
-						<div class="text-[10px] md:text-xs text-kick font-bold">KICK-TIKTOK</div>
-                        <div class="text-white font-black text-base md:text-lg my-1">21:00-03:00</div>
-                        <div class="text-[10px] md:text-xs text-blue-400">Just Chat - VALO</div>
-                    </div>
-
-					<div class="bg-zinc-900/50 p-4 md:p-6 rounded-xl border border-zinc-800 text-center hover:bg-zinc-800 transition group h-full flex flex-col justify-center">
-                        <div class="text-xs md:text-sm text-zinc-500 font-bold mb-2 group-hover:text-white">PERŞEMBE</div>
-						<div class="text-[10px] md:text-xs text-kick font-bold">KICK-TIKTOK</div>
-                        <div class="text-white font-black text-base md:text-lg my-1">21:00-03:00</div>
-                        <div class="text-[10px] md:text-xs text-purple-400"> VALORANT </div>
-                    </div>
-
-                    <div class="bg-zinc-900/50 p-4 md:p-6 rounded-xl border border-zinc-800 text-center hover:bg-zinc-800 transition group h-full flex flex-col justify-center">
-                        <div class="text-xs md:text-sm text-zinc-500 font-bold mb-2 group-hover:text-white">CUMA</div>
-						<div class="text-[10px] md:text-xs text-kick font-bold">KICK</div>
-                        <div class="text-white font-black text-base md:text-lg my-1">21:00-02:00</div>
-                        <div class="text-[10px] md:text-xs text-purple-400">Korku Gecesi</div>
-                    </div>
-
-					<div class="bg-zinc-900/50 p-4 md:p-6 rounded-xl border border-zinc-800 text-center hover:bg-zinc-800 transition group h-full flex flex-col justify-center">
-                        <div class="text-xs md:text-sm text-zinc-500 font-bold mb-2 group-hover:text-white">CUMARTESİ</div>
-						<div class="text-[10px] md:text-xs text-kick font-bold">KICK</div>
-                        <div class="text-white font-black text-base md:text-lg my-1">21:00-02:00</div>
-                        <div class="text-[10px] md:text-xs text-yellow-400">Just Chatting</div>
-                    </div>
-
-                    <div class="bg-zinc-900/50 p-4 md:p-6 rounded-xl border border-zinc-800 text-center hover:bg-zinc-800 transition group h-full flex flex-col justify-center">
-                        <div class="text-xs md:text-sm text-zinc-500 font-bold mb-2 group-hover:text-white">PAZAR</div>
-						<div class="text-[10px] md:text-xs text-kick font-bold">KICK - TIKTOK</div>
-                        <div class="text-white font-black text-base md:text-lg my-1">21:00-03:00</div>
-                        <div class="text-[10px] md:text-xs text-yellow-400">VALORANT</div>
-                    </div>
-
-                </div>
-                <div class="mt-6 text-xs text-center text-zinc-500 italic">
-                    *Yayın saatleri Discord sunucusunda anlık değişebilir.
-                </div>
-            </div>
-        </div>
+    <div id="loading-screen">
+        <div class="flash-text">GÜNÜN CLIP'İ SEÇİLİYOR...</div>
+        <div style="color:#666; margin-top:10px; font-size:14px;">SHRBRK ARŞİVİ TARANIYOR</div>
     </div>
 
-    <div id="analytics-content" class="p-4 md:p-8 max-w-[1600px] mx-auto pb-32">
-        
-        <div class="flex flex-col md:flex-row justify-between items-center mb-10 mt-2 p-4 rounded-xl border border-zinc-800 bg-zinc-900/50 gap-4">
-            <div class="text-center md:text-left">
-                <h2 class="text-xl font-extrabold tracking-tight flex items-center justify-center md:justify-start gap-2">
-                    <i class="fas fa-database text-zinc-500"></i> CANLI VERİ AKIŞI
-                </h2>
-                <p class="text-xs text-zinc-500 mt-1"><span id="updateTime">Bağlanıyor...</span></p>
-            </div>
-            <button onclick="fetchData(true)" class="w-full md:w-auto bg-zinc-800 hover:bg-zinc-700 text-white text-xs px-6 py-3 rounded-lg border border-zinc-700 transition flex items-center justify-center gap-2">
-                <i class="fas fa-sync-alt"></i> YENİLE
-            </button>
-        </div>
-
-        <div id="youtube-section" class="section-divider">
-            <i class="fab fa-youtube text-red-600 text-xl"></i> YOUTUBE ANALYTICS
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 yt-theme">
-            
-            <div class="card md:col-span-4 lg:col-span-3 h-[400px]">
-                <div class="card-header">
-                    <div class="card-title text-red-500 hacker-target"><i class="fas fa-calendar-alt"></i> AYLIK PERFORMANS</div>
-                    <div class="btn-group" id="monthlyBtns">
-                        <button onclick="updateMonthly('views')" class="active">View</button>
-                        <button onclick="updateMonthly('likes')">Like</button>
-                        <button onclick="updateMonthly('comments')">Com</button>
-                    </div>
-                </div>
-                <div id="monthlyList" class="flex flex-col gap-3 overflow-y-auto pr-2 custom-scroll"></div>
-            </div>
-
-            <div class="card md:col-span-4 lg:col-span-3 h-[400px]">
-                <div class="card-header">
-                    <div class="card-title hacker-target"><i class="fas fa-chart-pie text-blue-500"></i> AYLIK PAY (Son 5 Ay)</div>
-                </div>
-                <div class="relative flex-1 flex items-center justify-center p-2">
-                    <canvas id="monthlyPieChart"></canvas>
-                </div>
-            </div>
-
-            <div class="card md:col-span-4 lg:col-span-3 h-[400px]">
-                <div class="card-header">
-                    <div class="card-title hacker-target"><i class="fas fa-trophy text-amber-500"></i> TOP 7 (LIKES)</div>
-                </div>
-                <div id="peakVideosList" class="flex flex-col gap-1 overflow-y-auto pr-1 custom-scroll"></div>
-            </div>
-
-            <div class="card md:col-span-4 lg:col-span-3 h-[400px]">
-                <div class="card-header">
-                    <div class="card-title hacker-target"><i class="fas fa-users text-green-500"></i> KİTLE ANALİZİ</div>
-                </div>
-                <div class="flex flex-col gap-4 h-full">
-                    <div class="flex items-center justify-between bg-zinc-900/50 p-3 rounded-lg border border-zinc-800">
-                        <div class="w-16 h-16">
-                            <canvas id="ytGenderChart"></canvas>
-                        </div>
-                        <div class="flex-1 ml-4 text-xs space-y-1">
-                            <div class="flex justify-between"><span class="text-pink-400 hacker-target">Kadın</span> <span class="font-bold hacker-target">64%</span></div>
-                            <div class="flex justify-between"><span class="text-blue-400 hacker-target">Erkek</span> <span class="font-bold hacker-target">36%</span></div>
-                        </div>
-                    </div>
-                    <div class="space-y-3 p-1">
-                        <div>
-                            <div class="flex justify-between text-[10px] mb-1 text-zinc-400"><span class="hacker-target">18-24 Yaş</span> <span class="hacker-target">%48.2</span></div>
-                            <div class="progress-bg"><div class="progress-fill-yt" style="width: 48.2%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-[10px] mb-1 text-zinc-400"><span class="hacker-target">25-34 Yaş</span> <span class="hacker-target">%37.1</span></div>
-                            <div class="progress-bg"><div class="progress-fill-yt" style="width: 37.1%"></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card col-span-1 md:col-span-12 lg:col-span-9 min-h-[320px]">
-                <div class="card-header">
-                    <div class="card-title text-zinc-300 hacker-target">
-                        <i class="fas fa-chart-line"></i> BÜYÜME TRENDİ (EYLÜL BAŞLANGIÇ)
-                    </div>
-                    <div class="btn-group" id="weeklyBtns">
-                        <button onclick="updateWeekly('views')" class="active">İzlenme</button>
-                        <button onclick="updateWeekly('likes')">Beğeni</button>
-                        <button onclick="updateWeekly('comments')">Yorum</button>
-                    </div>
-                </div>
-                <div class="w-full h-full relative p-2">
-                    <canvas id="growthChart"></canvas>
-                </div>
-            </div>
-
-            <div class="card col-span-1 md:col-span-12 lg:col-span-3 min-h-[320px]">
-                 <div class="card-header">
-                    <div class="card-title hacker-target"><i class="fas fa-clock text-zinc-500"></i> SON 15 GÜN</div>
-                </div>
-                <div class="h-full flex items-end pb-2">
-                    <canvas id="dailyChart"></canvas>
-                </div>
-            </div>
-
-            <div class="col-span-1 md:col-span-12 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="card h-[380px]">
-                    <div class="card-header">
-                        <div class="card-title text-red-500 hacker-target"><i class="fas fa-fire"></i> EN ÇOK İZLENEN (TOP 3)</div>
-                    </div>
-                    <div id="colTopViews" class="flex flex-col gap-2 overflow-y-auto pr-2 custom-scroll"></div>
-                </div>
-                <div class="card h-[380px]">
-                    <div class="card-header">
-                        <div class="card-title text-amber-500 hacker-target"><i class="fas fa-bolt"></i> ETKİLEŞİM LİDERLERİ</div>
-                    </div>
-                    <div id="colTopEng" class="flex flex-col gap-2 overflow-y-auto pr-2 custom-scroll"></div>
-                </div>
-                <div class="card h-[380px]">
-                    <div class="card-header">
-                        <div class="card-title text-blue-500 hacker-target"><i class="fas fa-history"></i> EN SON YÜKLENENLER</div>
-                    </div>
-                    <div id="colRecent" class="flex flex-col gap-2 overflow-y-auto pr-2 custom-scroll"></div>
-                </div>
-            </div>
-
-        </div>
-
-        <div id="tiktok-section" class="section-divider mt-20">
-            <i class="fab fa-tiktok text-[#25F4EE] text-xl" style="text-shadow: 2px 2px 0px #FE2C55;"></i> TIKTOK ANALİTİK MERKEZİ
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 tt-theme mb-20">
-            <div class="card md:col-span-12">
-                 <div class="card-header">
-                    <div class="card-title text-[#FE2C55] tt-effect"><i class="fas fa-calendar-check"></i> SON 60 GÜN ÖZETİ</div>
-                </div>
-                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 items-center text-center">
-                     <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                         <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1 tt-effect">Toplam İzlenme</div>
-                         <div class="text-2xl md:text-3xl font-black text-white dark:text-white light:text-black tt-effect">12.0M</div>
-                         <div class="text-[9px] text-[#25F4EE] mt-1 tt-effect">▲ Büyük Artış</div>
-                     </div>
-                     <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                         <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1 tt-effect">Beğeniler</div>
-                         <div class="text-2xl md:text-3xl font-black text-white tt-effect">239K</div>
-                         <div class="text-[9px] text-green-500 mt-1">▲ +199K</div>
-                     </div>
-                     <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                         <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1 tt-effect">Paylaşım</div>
-                         <div class="text-2xl md:text-3xl font-black text-white tt-effect">6.3K</div>
-                         <div class="text-[9px] text-green-500 mt-1">▲ +3.5K</div>
-                     </div>
-                     <div class="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                         <div class="text-[10px] text-zinc-500 uppercase tracking-widest mb-1 tt-effect">Yorumlar</div>
-                         <div class="text-2xl md:text-3xl font-black text-white tt-effect">1.5K</div>
-                         <div class="text-[9px] text-green-500 mt-1">▲ +948</div>
-                     </div>
-                 </div>
-            </div>
-
-            <div class="card md:col-span-6 lg:col-span-5 h-[350px] md:h-[300px]">
-                <div class="card-header">
-                    <div class="card-title text-[#25F4EE] tt-effect"><i class="fas fa-venus-mars"></i> CİNSİYET DAĞILIMI</div>
-                </div>
-                <div class="flex flex-col md:flex-row items-center justify-center gap-6 h-full">
-                    <div class="w-40 h-40 relative flex-shrink-0">
-                        <canvas id="ttGenderChartSeparate"></canvas>
-                    </div>
-                    <div class="flex flex-row md:flex-col gap-3 w-full justify-center">
-                        <div class="bg-zinc-900/50 px-4 py-2 rounded-lg border-l-4 border-[#FE2C55] flex-1">
-                            <div class="text-xs text-zinc-400">Kadın</div>
-                            <div class="text-xl font-bold text-white tt-effect">%64</div>
-                        </div>
-                        <div class="bg-zinc-900/50 px-4 py-2 rounded-lg border-l-4 border-[#25F4EE] flex-1">
-                            <div class="text-xs text-zinc-400">Erkek</div>
-                            <div class="text-xl font-bold text-white tt-effect">%36</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card md:col-span-6 lg:col-span-7 h-[300px]">
-                <div class="card-header">
-                    <div class="card-title text-[#FE2C55] tt-effect"><i class="fas fa-user-clock"></i> YAŞ ARALIKLARI (TÜMÜ)</div>
-                </div>
-                <div class="flex flex-col justify-center h-full gap-5 px-2 md:px-4">
-                    <div class="relative">
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-zinc-400 font-bold tt-effect">18 - 24 Yaş</span>
-                            <span class="text-white font-bold tt-effect">%48.2</span>
-                        </div>
-                        <div class="progress-bg h-4 rounded-full">
-                            <div class="progress-fill-tt" style="width: 48.2%"></div>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-zinc-400 font-bold tt-effect">25 - 34 Yaş</span>
-                            <span class="text-white font-bold tt-effect">%37.1</span>
-                        </div>
-                        <div class="progress-bg h-4 rounded-full">
-                            <div class="progress-fill-tt" style="width: 37.1%"></div>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="text-zinc-400 font-bold tt-effect">35+ Yaş</span>
-                            <span class="text-[#FE2C55] font-bold tt-effect">%14.7</span>
-                        </div>
-                        <div class="progress-bg h-4 rounded-full">
-                            <div class="progress-fill-tt bg-zinc-600" style="background: #333; width: 14.7%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="instagram-section" class="section-divider">
-            <i class="fab fa-instagram text-2xl text-gradient-ig"></i> INSTAGRAM ANALYTICS
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 ig-theme mb-20">
-            <div class="md:col-span-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="card flex flex-row items-center justify-between !p-5">
-                    <div>
-                        <div class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider ig-magical">Toplam İzlenme</div>
-                        <div class="text-2xl font-black text-white mt-1 ig-magical">1.8M</div>
-                    </div>
-                    <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-pink-500"><i class="fas fa-eye"></i></div>
-                </div>
-                <div class="card flex flex-row items-center justify-between !p-5">
-                    <div>
-                        <div class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider ig-magical">Toplam Beğeni</div>
-                        <div class="text-2xl font-black text-white mt-1 ig-magical">142K</div>
-                    </div>
-                    <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-pink-500"><i class="fas fa-heart"></i></div>
-                </div>
-                <div class="card flex flex-row items-center justify-between !p-5">
-                    <div>
-                        <div class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider ig-magical">Ort. İzlenme (60 Gün)</div>
-                        <div class="text-2xl font-black text-white mt-1 ig-magical">42.5K</div>
-                    </div>
-                    <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-purple-500"><i class="fas fa-chart-bar"></i></div>
-                </div>
-                <div class="card flex flex-row items-center justify-between !p-5">
-                    <div>
-                        <div class="text-[10px] text-zinc-500 uppercase font-bold tracking-wider ig-magical">Ort. Beğeni (60 Gün)</div>
-                        <div class="text-2xl font-black text-white mt-1 ig-magical">3.1K</div>
-                    </div>
-                    <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-purple-500"><i class="fas fa-thumbs-up"></i></div>
-                </div>
-            </div>
-
-            <div class="card md:col-span-8 h-[350px]">
-                <div class="card-header">
-                    <div class="card-title text-gradient-ig ig-interactive"><i class="fas fa-rocket"></i> SON 60 GÜN GELİŞİM (VİRAL ETKİSİ)</div>
-                </div>
-                <div class="w-full h-full relative p-2">
-                    <canvas id="igGrowthChart"></canvas>
-                </div>
-            </div>
-
-            <div class="card md:col-span-4 h-[350px]">
-                <div class="card-header">
-                    <div class="card-title text-pink-500 ig-interactive"><i class="fas fa-crown"></i> TOP 10 REELS</div>
-                </div>
-                <div id="igTopReels" class="flex flex-col gap-2 overflow-y-auto pr-2 custom-scroll">
-                    </div>
-            </div>
-
-            <div class="md:col-span-6 card h-[300px]">
-                 <div class="card-header">
-                    <div class="card-title text-zinc-300 ig-interactive"><i class="fas fa-calendar-day"></i> SON 14 GÜN - İZLENME</div>
-                </div>
-                <div class="w-full h-full relative p-1">
-                    <canvas id="igDailyViewsChart"></canvas>
-                </div>
-            </div>
-            <div class="md:col-span-6 card h-[300px]">
-                 <div class="card-header">
-                    <div class="card-title text-zinc-300 ig-interactive"><i class="fas fa-heart-pulse"></i> SON 14 GÜN - BEĞENİ</div>
-                </div>
-                 <div class="w-full h-full relative p-1">
-                    <canvas id="igDailyLikesChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="video-container"></div>
+    
+    <button id="random-btn" onclick="startRandomSelection()">Rastgele Klip Getir</button>
 
     <script>
-        const API_URL = "https://sbanaliz.canersavas3d.workers.dev";
-        let WEEKLY_DATA_CACHE = {}; 
-        let MONTHLY_DATA_CACHE = {}; 
-        let GROWTH_CHART = null;
+        // =================================================================
+        // 1. TWITCH ID LİSTESİ (Senin Dosyandan Aldım)
+        // =================================================================
+        const twitchClipsData = ["VainLuckyMetalTheThing-EU4OisuRh_dhB7JP","FurtiveSuaveTofuPanicVis-tNVoerDzcYBMzTKN","AmusedMoldyMoonDeIlluminati-4PEYeqX7a8u5ts2o","HedonisticSquareRedpandaBIRB-PE5LkhRWkXJw0Kqs","YummyHappyTapirSuperVinlin-I4zFdlGpdrueaMus","BloodyPricklyYakinikuCorgiDerp-dVYwvPxFzXtT-8EA","ScrumptiousGloriousChowderOneHand-zDS3scCgfBNJTmD_","GoodDelightfulOstrichImGlitch-dna684bIWqNiw8cs","CleverOilyMochaShazBotstix-mpd7p-g3YYr2gIdn","HelplessGrotesqueMarjoramSoonerLater-WZSuOPjpfO7DGsNJ","MiniatureTangentialSandpiperNerfRedBlaster-kvp7-DCEmy8Ppbn9","ModernNimbleLardDoggo-asF4JrHAowdWQiCz","SucculentSuccessfulMangoOpieOP-6rUxbWrZ4ha1eZ2s","ImpossibleKawaiiLEDPicoMause-dE9ppMvRUQlGSzA1","SmokyFlaccidButterflyJebaited-hWa5-8bOWpVvM2iv","WildTubularLasagnaTwitchRPG-jnv7Ts_ZAhYx8led","EnthusiasticHeadstrongUdonKippa-aW-neHo2TSZLvAv9","PatientVainJalapenoYee-8EoOggRW-FTVbKfH","SpeedyFastNeanderthalPJSalt-ozMRnQB4PHBHFwCP","FlirtySarcasticElkStrawBeary-OojCWZ2UxiV4N-S-","SolidCaringKiwiAMPEnergyCherry-Ed4sOTJ_Y705Uj1s","CreativeStupidCodEleGiggle-BsVOdPjgwIQXaU8t","ScrumptiousTallMuleRalpherZ-sk0IrlvBGW-sfCQg","AttractivePiercingPlumageBigBrother-L6RpwIxfKlEr-2bk","FurryTubularHyenaPeoplesChamp-WrPMm8kiIKzGWJGG","YawningStrangeFennelItsBoshyTime-Tp84mwql0SE5bP4b","TangibleFlirtyBibimbapFailFish--lvZYAtHo7LTGWaY","EvilAntediluvianWaterBCWarrior-ZCvqU6lr2yR9-x3B","BoringJoyousSamosaOptimizePrime-GJn3sjKL11cn_6e6","EphemeralBenevolentTaroDancingBaby-w0Vh_9wuztguSLm6","SparklingSmoggyBeanPanicBasket-qskWrXAN_KDXHLIj","SavageCreativeNigiriWow-7Tr9PRn9g2zeGhSd","SillyWealthyWaspBloodTrail-EoaLPssutx1v0fbc","SilkyLachrymoseEggplantBIRB-14bFvKEABv8pRtn7","KnottyGleamingDragonfruitMoreCowbell-pinDw4FiRK2Il88I","GorgeousKawaiiCasetteKappaWealth-4mPjZS9O72W7-bsj","DreamyTrustworthyMarjoramHumbleLife-rDMZ7ttUrXtR-ziW","FancyFuriousGrouseBigBrother-JovgDwe_tk1lP3aT","AttractiveDrabChickenOSfrog-NAXR_nW33x0uAwxL","HedonisticInexpensiveLatteUWot-ptE5O9Yzj8fKbJ6x","AbrasiveOnerousPuffinBibleThump-5hYZKJYqDXiWlB0A","VastGorgeousIguanaYee-eD-AU9EPObHzPYNX","LaconicFaintLattePeteZarollTie-ECUk6C7BTPe0-nBL","SmallSucculentHawkOMGScoots-aL3Dw2YPsPxiPDx-","FuriousObedientLegKAPOW-xfO7ada71F4eRO4E","FilthyPreciousMangetoutTF2John-2sshTu8EZz2vwOu9","LivelyIronicShieldNotLikeThis-j_fGwlGMOT_Ejk-E","CalmLittleGrouseAsianGlow-lTiQpQKIXrEMnK3_","BusyBlatantSkirretPeoplesChamp-jA8LyFVnVl1wxNG1","OnerousShortPlumageNerfRedBlaster-HQ1Jlb2r0JixMeeF","ResourcefulAttractiveBaguetteGingerPower-aNk6lz1LGQ0vIoSM","RespectfulTransparentCatShadyLulu-kMSQ5QU6sOMr4_ax","StupidSweetTurtleTwitchRPG-_JWVIZ70vl-shjgo","DignifiedSarcasticBorkPlanking---9vC5GgP4Vyl3Gv","AcceptablePluckyAlpacaDerp-AxnjnoVw5kY4F2p5","ManlyBlatantNightingaleTwitchRPG-yJqu5-yoaUBymz7E","ZealousSillyQueleaRalpherZ-kb94PrFumwojRBeA","PoliteInnocentButterflyCoolStoryBob-vx8t-sYuvxndigjX","AuspiciousTameCobraKlappa-BZFqMLLDB4CG1K_q","AverageFunnyAlmondDBstyle-Zdpy5JqmW84Ke0gG","AbnegateSuccessfulTarsierUWot-DfPkGfMr3ahvrieQ","AbstemiousFilthyKleeNotATK-8fNyJ6XJaxLsXFCs","FuriousSleepyPlumageTakeNRG-2_uJ84665MBIWpBl","SincereOddButterflyVoteNay-jJPFc-FcixB12QNv","ConcernedCredulousBearKappa-Ub4h0HP2wFBctydr","FilthyAltruisticGarlicShazBotstix-Md_Y0xqwHySoWE4X","AgitatedPleasantWombatNononoCat-wAS1__aDArdSLVy9","ThoughtfulBrightArmadilloBuddhaBar-jeFc6PaT48hJyyf2","SilkyEnjoyableKangarooSSSsss-AlHnZCOQkPpQMdjY","KnottyLovelyNeanderthalSaltBae-B87UG6Hkrnm_NPsu","TallFaintWaspSquadGoals-JTAm16SO2SB5rUH6","ZanyCulturedAlbatrossKappaPride-rHefHtIldr5zQUBj","LazySparklyMarrowFreakinStinkin-GCmFdV0MZS6LUdRg","TenderStrangeBeaverGrammarKing-dMUq2s2aukE_CqUe","PopularDeliciousGrassDoggo-L5HMqIhdU3qmXGve","RepleteAgitatedShrimpPhilosoraptor-qfT2V-RQ-5_fUBKF","InventiveFriendlyPieSuperVinlin-awD_SmJmkSxXEU1T","ClearHungryParrotSwiftRage-TqlJZjVxh4QVDOpO","DrabEnergeticGiraffeBCWarrior-9dcRh09BuvItGTM9","ConfidentConfidentEyeballCopyThis-XRZ8Q7EEZwsWngsv","RefinedEasyStarBabyRage-DOpjZBrCGZ7iV_gc","ArtisticDarkBearPraiseIt-D5YBj-7_T4kKOc8F","HomelySpikyDogeChocolateRain-0FtmFd-RGM7ajC2i","ArtisticTolerantSoybeanHotPokket-3nf1581-E1yvCzij","BrainyAssiduousMochaPartyTime-ONSE5J3abtZCmweb","PoliteRepleteStarlingTakeNRG-twYfnuS-doIqsuXd","ArbitrarySucculentTrayLeeroyJenkins-s6Vx9I7nMIq2-BAk","BlushingUnsightlyHummingbirdDendiFace-o6vGPISnjlKPqBpi","CaringLovelyEelNinjaGrumpy-jVM1dN1WKGatsF3L","HomelySmallButterflyVoHiYo-cKqe_nm1I7YBEmys","AwkwardAcceptableSpaghettiNotLikeThis-NKvrdm0d_j4S_G7A","JollySuspiciousCatFreakinStinkin-iBIv4pccOWDdWz0P","PolishedNeighborlyAnacondaDuDudu-pJ8SudZyxLu7GSBS","IgnorantSpikyPineapplePastaThat-cI584Lazz8iSijOn","CharmingSmallAlbatrossChocolateRain-aPPWn5KmYQjyDx6R","EasyTenderStinkbugKreygasm-e9X6N52pKzSHzEfa","IgnorantDirtyWaspRitzMitz-4f_1QLKw_TU5GU70","KathishMistyLapwingBloodTrail-OZaOKWhDukGOxR1g","KindConcernedArugulaTwitchRaid-1qeSS77NLuoj_UjL","WrongTacitJamMrDestructoid-W0qGC23KvTXOEZDg","BlatantSmoggyCattleJKanStyle-BZWUatHIU5iKX-rg","DeafHelplessWallabyMoreCowbell-u7LuhHGT-bA6EOI0","BreakableSplendidAmazonFrankerZ-O0mvvF8xnOdGZ02h","HelplessCuriousEagleSSSsss-aTFpaYsIgDD3TDir","CalmShinyArtichokeSoonerLater-WwihVIssapfbP4J4","AmazingGlutenFreeCormorantBatChest-AB92JCNq0iSSgyjq","ConsiderateSmoggyStapleRaccAttack-GKeQ6s0oEI5qFbiI","FineVainGoblinDansGame-Hhshb1BuF44E1p4J","LightSparklyKiwiCorgiDerp-Iozj3Kj_MNhpQX5u","EmpathicPlausiblePlumDerp-b3Goe8t9BzYGBged","FreezingHealthyWoodcockPanicBasket-CywVRLirEGE3UEEA","DistinctAffluentRadicchioPrimeMe-ATgJeRResrhbAR2A","PrettyDifferentLampStinkyCheese-dImto9DPDi1Y9_r_","SparklingOddYamLeeroyJenkins-4KdJzcNEjGvBB0Wy","SuccessfulTiredEchidnaStinkyCheese-fe9gKpAjziDRgRYA","DependableBraveWolverineOhMyDog-N8qc8nl7kSEOlApY","NiceSweetTarsierOMGScoots-dn08vJ1w9A6yHtVO","ThankfulBadCamelFunRun-d0pecPFtiap8Ef7n","SteamyBrainyOrcaBloodTrail-cHLQEKD8c-ZPLn_z","AdventurousDepressedTapirTheThing-G6FzrZJkPpmUnojI","RamshackleLongPoxWoofer-Q4TMmW2JE1tpjbAZ","KitschySillyArtichokeBrainSlug-UWqsDfjNVhZQnLvU","LongGorgeousShieldWOOP-JBJbJpqfArHyhafz","HardDrabWeaselMVGame-6yXCQj8F6kTkar2I","AttractiveFineLasagnaTebowing-rRizns6ZqhRdedqp","PiliableBoxySparrowDAESuppy-NTsymi4pGXGzXHw9","VenomousLazyCrowNinjaGrumpy-7ct7PvSxRUObCYBN","TenaciousConfidentPancakeImGlitch-_E_s6mXvM24ZA_IF","BlushingAgileRhinocerosDxAbomb-wm9KtYKLFVmHEAGT","RichPlausibleRatResidentSleeper-UiXMOWUbxC_KK_y6","CleverGlamorousOstrichTheTarFu-WRU_EW7aFbqF8SeK","PeppyEncouragingAirGuitarPraiseIt-U5w_5pU8wzs5WVJP","MoistGenerousFiddleheadsTwitchRaid-_DWQmoUW_SJEXs2o","EntertainingTardyNikudonMau5-ujP9B-vvwHhntzP2","FairDeafFinchPipeHype-PDSGRxasuloeGq5B","GiftedLightMinkDBstyle-5cCuliGg6jwJVPGy","ScrumptiousHeadstrongBeaverThisIsSparta-rrHqaPrchKxrKbA1","PopularAlluringRaccoonSquadGoals-o-E5Y8YUCjhl6f_9","InnocentToughWaspKeyboardCat-HOMGINdx4I6D7rh6","AmazonianFurryBulgogiNinjaGrumpy-UEfyKsaUrYZiXbVR"];
 
-        // ChartJS Global Settings
-        Chart.defaults.color = '#71717a';
-        Chart.defaults.borderColor = '#27272a';
-        Chart.defaults.font.family = "'Inter', sans-serif";
+        // =================================================================
+        // 2. KICK ID LİSTESİ (BURAYA YAPIŞTIR)
+        // =================================================================
+        const kickClipsData = [
+            ["clip_01KF7184JGDQHZ537SY14X7MVB","clip_01KF6SPWF6SJ4F038BM4CHT4KN","clip_01KF4DTGZXVEHSJH78GYDEQ8ZT","clip_01KF1PG7G0X54VXHFY5WC1Y7JJ","clip_01KF1PFV2E1NE3JG1KP9J8AD1P","clip_01KEZ3FQ3MMBEM4HEDBWYYW2JT","clip_01KEYCKVY91E3SZ5TJCM7K56QC","clip_01KED4W39VFJRT092TJPECDZZE","clip_01KDV1XJ200PEKGHEHQJ1389SY","clip_01KDTVSWRHK4XXFT02DG3VRM7Y","clip_01KCCYWPT2EADYFWWGN8S22WKX","clip_01KCCYW2YQWPAZ1WQ8PMSWDVN1","clip_01KC79QT79YYYYD8J0TFSMW913","clip_01KBV0TPT7PTASQ2WG9ZPZ7779","clip_01KBTW8141EYPVV5B244CSFB3N","clip_01KBNKAQ8Y9TTM6WQNVBY9Y3W3","clip_01KBNH7QPH6B5PV2FWGVJAHYRD","clip_01KBHSTTQJB9WA4XKAS0S3FDZB","clip_01KBGDMMMF3KKKV1KKMCZGT3QP","clip_01KBAZJMXZFHPF484BMV64S6PH","clip_01KAQ2F6CPWK12Y5AJG9EDZ4ZV","clip_01KAQ2691QXBQCFCCTZPM38YPX","clip_01KAQ0G83YBC99450A5XM9C7DA","clip_01KAPYWAE2P6WPME6PWF0VCA38","clip_01KAPYS3EQ07B92AV8MX4FFC72","clip_01KAHHNX9PFGESGVJGTY3BWEF9","clip_01KA90SW28TTTS3PEGEHYQ49KR","clip_01KA4J3F8XBRE6NAVTSTQKHA1M","clip_01KA2G1J5D3PT236RP62C46ZCH","clip_01KA23W87B7CBJ4F74A8P6TAWY","clip_01KA1DS9QQH3D8ETKW5QJJE7X0","clip_01KA1DP15B60JC7TGP8D320Z1H","clip_01K9QT8BB6J4W214XC40CJWD04","clip_01K9FTGAQP2WFZKHAQNZER4JCC","clip_01K988GSJ7RTB2PP66YAYGT4QC","clip_01K986EX140C4WWNM3M4WXHK2C","clip_01K9861ZQB2GP9FEW50HWRBRR5","clip_01K985XWMCC8Y4RZH6VH7G9YZN","clip_01K95NRYPTRSSBZWXQF8QGRJ77","clip_01K8KQHCYBZY4YKT6DFRWQZ5E1","clip_01K8HGJM7DN7PVDKE6FQ2ANYST","clip_01K8HEXV4VVVWMX9QGKHWC305P","clip_01K8BF3628M8J61BWDV5V5CKPN","clip_01K8BE9E7YZ6ZGRVYAMV7ECYYG","clip_01K8B5XQ4B5Y1G2YQZYA11K8A8","clip_01K89VCJJ412M4T4PCJFGBQ3D6","clip_01K89V8AEQF7XDX8RBV45DYV4W","clip_01K89V41FGYGR1GXEQ36J5VAED","clip_01K89TBDFGEC8CXJZBG7HVTVSZ","clip_01K89T59Z2C1GY2Y3ZBBG6SKTD","clip_01K89G1FD7PHB85WVJ4767C25Y","clip_01K89E5RHGBED18H7QCAJEV2CA","clip_01K89CG6FJEC9CD3ZZ0FYEXMTW","clip_01K89BFYQMDRWKA27JMAMJ9ZW4","clip_01K8982FQFXGYEYZ2JQF5H9DY7","clip_01K86SWKDDY6EH4X6DB69TQH6P","clip_01K7YCEFBZA57C8APQH6WS8J4C","clip_01K7YA2HM6NMQZ287QNC2JM5HK","clip_01K7ES3VTBEDKSK7NHA22YYJM5","clip_01K7EREFXJPP94H83PT7W7RHJT","clip_01K7C022HDN6BBW0RW88XFYHW6","clip_01K7BZJWJ96JM59QTSSTBWF88A","clip_01K7BZGRTG53GPHZND5JXKKVHP","clip_01K7BZ8JWZ6BTZ53NAMP1Z3MS2","clip_01K7BYJVKXB0CZX66D99N40D6X","clip_01K7ACN06E8KPX70XZWCN8PQ7S","clip_01K79DYTBPKYMZYGDZA18W4H1K","clip_01K79DGRFSBR65DSN6164ERY3Z","clip_01K79BBX69CHAQZ4CHFQ7F4YED","clip_01K79A5DJA34SJVS13NZ9KEAM5","clip_01K77Y8M03SYQT8B2PHGJN8D5C","clip_01K77XSBVA00R8CSNV57S92QS5","clip_01K77WD6MPXCG59ACB0QJ5S38H","clip_01K77WAZ75TC4KC7R4XAHK3GRH","clip_01K77VDE0NR4FCNBEAQR28DRWR","clip_01K72G5SHEQ4AQZN04HY62FQNA","clip_01K6BTBPP634PZMJC6JDQ7YPTP","clip_01K6BT7HW23JQYXQR2EJQ4BVTM","clip_01K6BSXEXTBF1MB8J62C1M0H1M","clip_01K6BSW0D6VRS9BGXZA0YJEF1P","clip_01K6BSGAGGCRYG50VP7TVK7N05","clip_01K6BS3HEY85XQD5H2ASX42B41","clip_01K6BNZ88JNTG3BZDBXTGX76ZV","clip_01K6BNX2FBP5VC031Y886HZJYS","clip_01K6BNMCCMJ5DATPYHFP7Q2J1R","clip_01K6BEBEDK8SP21WCSGXR87RFT","clip_01K690S3CZRCGYFYENX21DACFV","clip_01K68YK6NBC3VRCV8KCAYRNYSN","clip_01K63WGK2BP62SZYFZ9H7R7MVG","clip_01K60FYYGEXKDB2GB42JPX4VH2","clip_01K5C9WN9VV35XB2V3VZJD0K1V","clip_01K5A5WP7WW12NCW2JNVR8XV9Y","clip_01K5A5Q2TB74DRDG0RZK8X9DEH","clip_01K5A5DQVWA4E496GCKS3S0JH5","clip_01K5A4YEQN74N642VJZ7W2TTEN","clip_01K5A4V2FZNJ6142FRS8JTEW8Q","clip_01K5A4SV3XYCHFT2N38M6DN02H","clip_01K5A4QQ1PZB7RGSNV1DT6TXMX","clip_01K5A4H68SE0S7MNTWRQVKHBQV","clip_01K5A4E78JRDE1JQHG4FJ8441V","clip_01K5A48E2W5X59YA4NN94G6T1Q","clip_01K5A39SKJ6JRWZNS1Z996D66Z","clip_01K5A39RKDQMEG8H4T875T5BJZ","clip_01K5A2Z014TW4KH6H7B41GHQ66","clip_01K5A2WN9WVXY127MCJM8FYWN4","clip_01K5A2WMH50G122GXD5C3TPJD6","clip_01K5A2P3X985S5FX7RWS29N36Q","clip_01K5A2M33E46J1MZXDHDZZNZJD","clip_01K5A2M2BN19D42H4C8Z81A6AH","clip_01K5A26MXWCBBYDJ35H25071D0","clip_01K54Y86WF0SSAHCR4RZ8AC62M","clip_01K4RB0ZHAWJCR4EA6A17WRG2B","clip_01K4K4Z2KHJ4M8S51N8VEWR9D3","clip_01K4JVMTZP0R5AGC1W1K140GNX","clip_01K40HNJF6H29GEKT3AC5N1TY9","clip_01K3XWBNYY8AYZBB3Y0BCPRDQ2","clip_01K3XVZPYK1NSZM6CVKXRX6Z7Q","clip_01K39JESRGTV6GZF5J19TN8XG4","clip_01K34D2H4WAT1E37RFKGYDW7CY","clip_01K31R26MT5RBS69JGP6ZGSDRE","clip_01K2TEG37GQ4GXCN8QJS4ZZREV","clip_01K2T205V48W7GZN60BPH0W4RK","clip_01K2T0HJ1R1K2ZD9PDR3KYJE7C","clip_01K2SZXS815MCP11R827HS061E","clip_01K2SZNKMWB74X4X15H0E7YEG0","clip_01K2SY8WVT9AM9JT9HADPW0QZW","clip_01K2SWYS4DBYFKH49A5BW3HFE5","clip_01K2SA99DCVBN0D7N64RJNWV3R","clip_01K2Q6AE5WEJJ9VN9RJS3WJHZQ","clip_01K2N8553WASZ4RV41FW0Z098V","clip_01K1BQ9W7SSEJDFA2WCHMHF56Z","clip_01K145SQYVGXX5J2K08ZV6556Y","clip_01K145G75G07TJE9C6VX7QDV3J","clip_01K1454RXB4CER52SQHVV3MPZ4","clip_01K144QDA8ESYV6ZV8BANC0R6F","clip_01K144AV1RXX9G07DBQ4ZWK0Y0","clip_01K0WFCHC454WTF54AV43C48E8","clip_01K04Q8FJPWAVEP9GMFC70AG8B","clip_01JZK10N20FEDDWF88ZJH37GKA","clip_01JZK0Y96HHR50HMC88RKG6SDH","clip_01JZGM8V19TDHVXTHV7W6E5B46","clip_01JZGKRAWX2BE8Q6MFKVZYTQ2B","clip_01JYBWK0D0F0QKGCJW38XB20JX","clip_01JYBW5K9TZA417GPMP9HAH72F","clip_01JX0W88VWFE5YQPQ62V9K812F","clip_01JX0VSTD7FB7EKHR2A6VRVDAC","clip_01JWMA18TJ4TMYTBWTVTCT8B7N","clip_01JW6TGPNXH0XH0AAGKP19GQV7","clip_01JW6HRQ118G8BH4MM3739DN74","clip_01JW6HASNTES3JH0FVG4ST2ET9","clip_01JW6GWG2JWJQMX04BNHDHE8TD","clip_01JVZDYH64GX9T3J8EB16NR6XN","clip_01JV30NNRBQ9946NMAZV4AS8M7","clip_01JTXAJP5B2DC14YNAARRWG83H","clip_01JT6PN5VWFVTV35NN4B8812P2","clip_01JT65S1C6SQFXKJ4X030AK8YM","clip_01JT474AXNC1QM0XH9XSGZ3SKQ","clip_01JS6Y5P2E56RNX5EXVKF8BEKG","clip_01JRTKYJCM9P6DMENE22BZ19Q4","clip_01JQ9WX5F4WXC38AF2BTCA59FC","clip_01JPQY8A4DDNP8KDC71JWKNCMX","clip_01JPHMB844BT5Z5WE6ZBB8CG7X","clip_01JNQ5WEKN7P9CPYQRTT4ZRB2F","clip_01JNPJWPY4YWXCSDD9CJMYNZD7","clip_01JNPHAC67EMP18X1HN8QHVT9V","clip_01JNENXAS8TFV37T46BM9RRN8G","clip_01JMT2XKK30QVHNRNRR8SVZ0F0","clip_01JMS82SQG0J50019N7VM84ETN","clip_01JMS7FD52KJ2RHG40XQ3WAMHC","clip_01JM5PGFPMMR3NYVGK5BGN9BZP","clip_01JKKFD618N38KNWRTPB37J9YZ","clip_01JJSXBYA8E30W5QTEDZPCQWYC","clip_01JJSVR3W9JGDE8EXRBJRRH8GE","clip_01JJ1KWZ174GXPVAX35BBEEQQF","clip_01JJ0G06PFXSXMTWDDP6DF0KYG","clip_01JJ0FSPGKN3DFH70628BF2CEF","clip_01JJ0F5EHN4SJ26ZV916GAXH2X","clip_01JJ0F0PEM3XMG4QPJR2E25MK2","clip_01JHBJEG9TWN640S0AD2F8S05S","clip_01JHBH4GC4NT5NZ7Z383R8H0JE","clip_01JGPX80G7MX2KFQJPWNPHVEG6","clip_01JGF9VVXZ7K4PMTCP8WW8XGVP","clip_01JGF4EWT5YNSVTKQZVP3K83WD","clip_01JGEED7DHDYRVQ19C3S1X37BS","clip_01JG7B9WJS0HG3G97XPX58J39Z","clip_01JG797AGNQ37BBS3B81DW4JX5","clip_01JFZ321S2VC4Z9EJ9YNYEJ9RX","clip_01JF5YMS5FJ61RYY95DX2BHJE9","clip_01JES7ZSJSPXH3Q1A8YZYQPCFW","clip_01JES5YMXHEC6DR1J5NEQ7DC0R","clip_01JEE1G19TJJA9NMB8Q7BBCNF2","clip_01JDZ6FVCRYNKRXYNA1EDF6X6K","clip_01JDEVEE587G9VYEYCV7JT23J7","clip_01JD318BASYB7B0J0Y281DG32C","clip_01JCVEAVZ9ZA752EAT9D7552YQ","clip_01JC954TB9FETG93PH65KMV5KJ","clip_01J9SF5XY4AEEW9F3DBRWTF82N","clip_01J914NJZHS4NMTXP2ABGD4BBX","clip_01J8X1SXKE466JM6FDXPQ9YE7H","clip_01J8R66KHRC45FHN2B7B3EAJ40","clip_01J7PF4AD9R55J5WRZW4SG568D","clip_01J7H79SCWKW304HXF4PC86WFP","clip_01J4J3H15FE27QKRP2TAEVQZF1","clip_01J4HGG0T9HBSCND9Z47HK0ZJB","clip_01J4H670JSMBWGZXY2642Q4A0T","clip_01J4F7V3S8Q2DQV406N0QGQNN0","clip_01J4F724F264AK6NVW1ZJ0KC8R","clip_01J4EV42HPQSWR72GMH4SGYNET","clip_01J42KNYTJ660DNNJEAXAFTB7X","clip_01J42KN8MJXMWK285ZEJM9FKKH","clip_01J429J1HXZQMNFFB09NNBBFTV","clip_01J428XT2K9NMXQWQYSK5VWQW5","clip_01J428RFKB46QDWD4CGW6YEDKW","clip_01J406TKTD2DHX0JDR71C2XRNQ","clip_01J3ZY3AKRF8MN16M3ERPRZ6X3","clip_01J3ZF8N934WF0FSBF9ZY37J0Y","clip_01J3ZCBMVQXFAPMKJSBP4QJ0QS","clip_01J3Z4CS2DFFGQT18VJB4BQC45","clip_01J3Z2K825DSG32E8T7WK1WZ23","clip_01J3XNM6A676AENHNZW9P2V25T","clip_01J3TW5T9HGKX1CNNXE8HS6GBJ","clip_01J3TK73G1QYGG5ZEWBKYP5X3E","clip_01J3TBKZTZ3AWMQXMQQPSQ1CX4","clip_01J3P3FXXWEB2DVJTAJWVJPZSV","clip_01J3K2H9YM7FBRJFPXSRNFS5MV","clip_01J3JBM64T1WA5951545QZ770R","clip_01J3GSQ7WCX54XVB6BMS0WQSHE","clip_01J3GGHA0RTNRHEYTG9G4FBBXY","clip_01J3DV40025XSJTDB2YKJTC2JZ","clip_01J3DA4ZH6KDHAP6D7G44TVNCV","clip_01J3BQ0ZX8VD19E0AJAEQE0TP3","clip_error","clip_success","clip_title","clip_created"]
+        ];
 
-        // --- NAVIGATION & UI LOGIC ---
+        // =================================================================
+        // 3. HAVUZLARI BİRLEŞTİRME VE MANTIK
+        // =================================================================
 
-        function smoothScroll(elementId) {
-            document.getElementById(elementId).scrollIntoView({ behavior: 'smooth' });
+        // Tüm klipleri tek bir yapıda birleştiriyoruz: {id: '...', type: 'twitch/kick'}
+        let masterList = [];
+
+        // Twitch ekle
+        twitchClipsData.forEach(id => masterList.push({ id: id, type: 'twitch' }));
+        // Kick ekle
+        kickClipsData.forEach(id => masterList.push({ id: id, type: 'kick' }));
+
+        function startRandomSelection() {
+            const loader = document.getElementById('loading-screen');
+            const container = document.getElementById('video-container');
+            const btn = document.getElementById('random-btn');
+
+            // 1. Ekranı temizle ve Yükleme ekranını göster
+            container.innerHTML = ""; 
+            loader.style.display = "flex";
+            loader.style.opacity = "1";
+            btn.disabled = true; // Butona üst üste basılmasın
+
+            // 2. 2.5 Saniye Bekle (Heyecan Yaratma)
+            setTimeout(() => {
+                // Rastgele Seçim Yap
+                const randomIndex = Math.floor(Math.random() * masterList.length);
+                const selectedClip = masterList[randomIndex];
+
+                // Videoyu Göm
+                embedVideo(selectedClip);
+
+                // Yükleme ekranını yavaşça kaldır
+                loader.style.opacity = "0";
+                setTimeout(() => { 
+                    loader.style.display = "none"; 
+                    btn.disabled = false;
+                }, 500);
+
+            }, 2500); // 2500 milisaniye = 2.5 saniye
         }
 
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        function embedVideo(clip) {
+            const container = document.getElementById('video-container');
+            let embedCode = "";
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const icon = document.getElementById('themeIcon');
-            if(document.body.classList.contains('light-mode')) {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-                Chart.defaults.borderColor = '#e4e4e7';
-                Chart.defaults.color = '#52525b';
-            } else {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-                Chart.defaults.borderColor = '#27272a';
-                Chart.defaults.color = '#71717a';
+            // Otomatik oynatmayı KAPAT (autoplay=false)
+            // Böylece kullanıcı tıklayarak açar
+            
+            if (clip.type === 'twitch') {
+                let domain = window.location.hostname || "localhost";
+                // Twitch: Autoplay false, Muted false (Tıklayınca sesli başlasın)
+                const url = `https://clips.twitch.tv/embed?clip=${clip.id}&parent=${domain}&autoplay=false&muted=false`;
+                embedCode = `<iframe src="${url}" allowfullscreen></iframe>`;
+            } 
+            else if (clip.type === 'kick') {
+                // Kick: Autoplay false
+                const url = `https://player.kick.com/${clip.id}?autoplay=false&muted=false`;
+                embedCode = `<iframe src="${url}" allowfullscreen></iframe>`;
             }
-            // Grafikleri güncellemek için
-            fetchData(); 
-            renderInstagramData();
+
+            container.innerHTML = embedCode;
+            console.log(`Seçilen Klip: ${clip.type.toUpperCase()} - ${clip.id}`);
         }
 
-        
+        // Sayfa ilk açıldığında da seçim sürecini başlat
+        window.onload = startRandomSelection;
 
-
-        // --- ORIGINAL ANALYTICS LOGIC ---
-        // (Bu kısım orijinal kodunuzdan, veri işleme mantığı korunmuştur)
-
-        async function fetchData(force = false) {
-            const timeEl = document.getElementById('updateTime');
-            if(timeEl) timeEl.innerText = "Veriler güncelleniyor...";
-            
-            try {
-                let res = await fetch(API_URL + (force ? "?force=true" : ""));
-                let json = await res.json();
-                
-                if(json.ok) {
-                    renderDashboard(json.data);
-                    const d = new Date(json.data.updated_at);
-                    if(timeEl) timeEl.innerText = "Son güncelleme: " + d.toLocaleTimeString();
-                } else {
-                    console.log("Mock data yükleniyor (API hatası)");
-                    // API çalışmazsa demo çalışsın diye hata vermiyorum
-                }
-            } catch(e) { console.error(e); }
-        }
-
-        function renderDashboard(data) {
-            const allVideos = data.videos;
-
-            // 1. Aylık Liste
-            const targetMonths = ["Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-            const monthlyStats = { views: {}, likes: {}, comments: {} };
-            
-            allVideos.forEach(v => {
-                const m = new Date(v.publishedAt).toLocaleString('tr-TR', {month:'long'});
-                if(targetMonths.includes(m)) {
-                    if(!monthlyStats.views[m]) {
-                        monthlyStats.views[m]=0; monthlyStats.likes[m]=0; monthlyStats.comments[m]=0;
-                    }
-                    monthlyStats.views[m] += v.stats.views;
-                    monthlyStats.likes[m] += v.stats.likes;
-                    monthlyStats.comments[m] += v.stats.comments;
-                }
-            });
-            MONTHLY_DATA_CACHE = monthlyStats;
-            updateMonthly('views');
-
-            // 2. Pasta Grafik
-            const pieLabels = targetMonths.filter(m => monthlyStats.views[m] !== undefined);
-            const pieData = pieLabels.map(m => monthlyStats.views[m]);
-            
-            new Chart(document.getElementById('monthlyPieChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: pieLabels,
-                    datasets: [{
-                        data: pieData,
-                        backgroundColor: ['#52525b', '#3b82f6', '#8b5cf6', '#eab308', '#ef4444'],
-                        borderWidth: 0,
-                        hoverOffset: 6
-                    }]
-                },
-                options: { cutout: '65%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-
-            // 3. Demografi
-            new Chart(document.getElementById('ytGenderChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Kadın', 'Erkek'],
-                    datasets: [{
-                        data: [64, 36],
-                        backgroundColor: ['#f472b6', '#60a5fa'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: {legend:{display:false}}}
-            });
-
-            // 4. Top 7
-            const topLikes = [...allVideos].sort((a,b)=>b.stats.likes - a.stats.likes).slice(0, 7);
-            const peakList = document.getElementById('peakVideosList');
-            peakList.innerHTML = "";
-            topLikes.forEach((v, i) => {
-                peakList.innerHTML += `
-                    <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" class="flex gap-2 p-2 rounded hover:bg-zinc-800 transition group border border-transparent">
-                        <div class="text-zinc-600 font-bold w-4 text-xs group-hover:text-red-500 hacker-target">#${i+1}</div>
-                        <div class="flex-1 min-w-0">
-                            <div class="text-xs font-bold text-zinc-200 truncate hacker-target">${v.title}</div>
-                            <div class="flex gap-3 text-[10px] text-zinc-500 mt-0.5">
-                                <span class="text-amber-500"><i class="fas fa-heart"></i> ${formatNum(v.stats.likes)}</span>
-                                <span><i class="fas fa-eye"></i> ${formatNum(v.stats.views)}</span>
-                            </div>
-                        </div>
-                    </a>
-                `;
-            });
-
-            // 5. Haftalık Grafik
-            const septStart = new Date('2025-09-01');
-            const weeklyData = {};
-            allVideos.forEach(v => {
-                const d = new Date(v.publishedAt);
-                if(d >= septStart) {
-                    const day = d.getDay();
-                    const diff = d.getDate() - day + (day == 0 ? -6 : 1);
-                    const monday = new Date(d.setDate(diff));
-                    const key = monday.getTime();
-                    if(!weeklyData[key]) weeklyData[key] = { date: monday, views:0, likes:0, comments:0 };
-                    weeklyData[key].views += v.stats.views;
-                    weeklyData[key].likes += v.stats.likes;
-                    weeklyData[key].comments += v.stats.comments;
-                }
-            });
-
-            const sortedWeeks = Object.keys(weeklyData).sort().map(k => weeklyData[k]);
-            WEEKLY_DATA_CACHE = {
-                labels: sortedWeeks.map(w => w.date.toLocaleDateString('tr-TR', {day:'numeric', month:'short'})),
-                views: sortedWeeks.map(w => w.views),
-                likes: sortedWeeks.map(w => w.likes),
-                comments: sortedWeeks.map(w => w.comments)
-            };
-            updateWeekly('views');
-
-            // 6. Günlük Grafik
-            const fifteenDaysAgo = new Date();
-            fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
-            const dailyData = new Array(15).fill(0).map((_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - (14-i));
-                return { date: d.toLocaleDateString('tr-TR', {day:'numeric', month:'short'}), views: 0 };
-            });
-            allVideos.forEach(v => {
-                const d = new Date(v.publishedAt);
-                if(d >= fifteenDaysAgo) {
-                    const diffDays = Math.floor(Math.abs(new Date() - d) / (1000 * 60 * 60 * 24)); 
-                    const index = 14 - diffDays;
-                    if(index >= 0 && index < 15) dailyData[index].views += v.stats.views;
-                }
-            });
-
-            new Chart(document.getElementById('dailyChart'), {
-                type: 'bar',
-                data: {
-                    labels: dailyData.map(d => d.date),
-                    datasets: [{
-                        data: dailyData.map(d => d.views),
-                        backgroundColor: '#3f3f46',
-                        hoverBackgroundColor: '#ef4444',
-                        borderRadius: 2
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: {display: false}, y: {display: false} } }
-            });
-
-            // 7. Detaylı Listeler
-            const topViews = [...allVideos].sort((a,b)=>b.stats.views - a.stats.views).slice(0, 3);
-            renderDetailedVideoCol(topViews, 'colTopViews');
-
-            const topEng = [...allVideos].filter(v=>v.stats.views>500).sort((a,b)=> {
-                const rA = (a.stats.likes+a.stats.comments)/a.stats.views;
-                const rB = (b.stats.likes+b.stats.comments)/b.stats.views;
-                return rB - rA;
-            }).slice(0, 6);
-            renderDetailedVideoCol(topEng, 'colTopEng');
-
-            const recent = [...allVideos].sort((a,b)=>new Date(b.publishedAt) - new Date(a.publishedAt)).slice(0, 3);
-            renderDetailedVideoCol(recent, 'colRecent');
-
-            setTimeout(() => { applyHackerEffect(); }, 500);
-        }
-
-        // --- INSTAGRAM & TIKTOK MOCK RENDERING ---
-        function renderInstagramData() {
-            const mockReels = [
-                { title: "Valorant Yeni Ajan Sızıntısı! 😱", views: 452000, likes: 32000, comments: 1200, link: "https://instagram.com/p/link-duzenle-1", thumb: "https://images.unsplash.com/photo-1624815174780-1a7375d050c9?auto=format&fit=crop&w=100&q=80" },
-                { title: "Jett Knife Ace 🔥", views: 210000, likes: 18500, comments: 450, link: "https://instagram.com/p/link-duzenle-2", thumb: "https://images.unsplash.com/photo-1624815174780-1a7375d050c9?auto=format&fit=crop&w=100&q=80" },
-                { title: "Böyle şans görülmedi...", views: 189000, likes: 12000, comments: 340, link: "https://instagram.com/p/link-duzenle-3", thumb: "https://images.unsplash.com/photo-1624815174780-1a7375d050c9?auto=format&fit=crop&w=100&q=80" },
-                { title: "Takım arkadaşım trollüyor 😂", views: 156000, likes: 9800, comments: 890, link: "https://instagram.com/p/link-duzenle-4", thumb: "https://images.unsplash.com/photo-1624815174780-1a7375d050c9?auto=format&fit=crop&w=100&q=80" },
-                { title: "Setup turu part 2", views: 120000, likes: 15000, comments: 560, link: "https://instagram.com/p/link-duzenle-5", thumb: "https://images.unsplash.com/photo-1624815174780-1a7375d050c9?auto=format&fit=crop&w=100&q=80" },
-            ];
-
-            const listContainer = document.getElementById('igTopReels');
-            listContainer.innerHTML = "";
-            mockReels.forEach((r, i) => {
-                listContainer.innerHTML += `
-                    <a href="${r.link}" class="flex items-center gap-3 p-2 rounded hover:bg-zinc-900 transition group ig-magical">
-                        <div class="text-zinc-600 font-bold w-4 text-xs group-hover:text-pink-500">#${i+1}</div>
-                        <img src="${r.thumb}" class="w-10 h-10 rounded-full border border-zinc-700">
-                        <div class="flex-1 min-w-0">
-                            <div class="text-xs font-bold text-zinc-200 truncate group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-pink-600 transition-all">${r.title}</div>
-                            <div class="flex gap-3 text-[10px] text-zinc-500 mt-0.5">
-                                <span class="text-zinc-400 group-hover:text-white"><i class="fas fa-eye"></i> ${formatNum(r.views)}</span>
-                                <span class="text-pink-600 group-hover:text-pink-300"><i class="fas fa-heart"></i> ${formatNum(r.likes)}</span>
-                            </div>
-                        </div>
-                    </a>
-                `;
-            });
-
-            // IG Growth Chart
-            const labels60 = Array.from({length: 60}, (_, i) => i + 1);
-            const data60 = labels60.map(i => 1000 + (i * i * 0.8) + Math.random() * 500);
-            
-            new Chart(document.getElementById('igGrowthChart'), {
-                type: 'line',
-                data: {
-                    labels: labels60.map(d => `Gün ${d}`),
-                    datasets: [{
-                        label: 'Etkileşim Puanı',
-                        data: data60,
-                        borderColor: '#bc1888',
-                        backgroundColor: (context) => {
-                            const bg = context.chart.ctx.createLinearGradient(0, 0, 0, 300);
-                            bg.addColorStop(0, '#bc188866'); 
-                            bg.addColorStop(1, '#bc188800');
-                            return bg;
-                        },
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 0
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-            });
-
-            // IG Daily Charts
-            new Chart(document.getElementById('igDailyViewsChart'), {
-                type: 'bar',
-                data: { labels: ["P", "S", "Ç", "P", "C", "Ct", "Pz"], datasets: [{ data: [12, 15, 11, 18, 22, 25, 23], backgroundColor: '#f09433', borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-            });
-            new Chart(document.getElementById('igDailyLikesChart'), {
-                type: 'bar',
-                data: { labels: ["P", "S", "Ç", "P", "C", "Ct", "Pz"], datasets: [{ data: [8, 12, 9, 14, 18, 21, 19], backgroundColor: '#dc2743', borderRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-            });
-        }
-
-        // --- HELPER FUNCTIONS ---
-
-        function renderDetailedVideoCol(videos, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = "";
-            videos.forEach((v) => {
-                container.innerHTML += `
-                    <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" class="flex gap-3 p-2 rounded hover:bg-zinc-800 transition group border border-transparent">
-                        <img src="${v.thumb}" class="w-20 h-12 object-cover rounded">
-                        <div class="flex-1 min-w-0 flex flex-col justify-center">
-                            <div class="text-[11px] font-bold text-zinc-200 truncate group-hover:text-red-500 transition-colors hacker-target">${v.title}</div>
-                            <div class="flex gap-2 text-[9px] text-zinc-500 mt-1">
-                                <span class="text-zinc-400"><i class="fas fa-eye"></i> ${formatNum(v.stats.views)}</span>
-                                <span class="text-zinc-400"><i class="fas fa-heart"></i> ${formatNum(v.stats.likes)}</span>
-                            </div>
-                        </div>
-                    </a>
-                `;
-            });
-        }
-
-        function applyHackerEffect() {
-            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890@#$%^&*";
-            const targets = document.querySelectorAll(".yt-theme .hacker-target, .yt-theme .card-title");
-            targets.forEach(element => {
-                if(!element.dataset.original) element.dataset.original = element.innerText;
-                element.onmouseenter = event => {
-                    let iterations = 0;
-                    const originalText = event.target.dataset.original;
-                    clearInterval(event.target.interval);
-                    event.target.classList.add("hacker-text"); 
-                    event.target.interval = setInterval(() => {
-                        event.target.innerText = originalText.split("").map((letter, index) => {
-                            if(index < iterations) return originalText[index];
-                            return letters[Math.floor(Math.random() * letters.length)];
-                        }).join("");
-                        if(iterations >= originalText.length) { 
-                            clearInterval(event.target.interval);
-                            event.target.classList.remove("hacker-text"); 
-                        }
-                        iterations += 1;
-                    }, 30);
-                }
-                element.onmouseleave = event => {
-                    clearInterval(event.target.interval);
-                    event.target.innerText = event.target.dataset.original; 
-                    event.target.classList.remove("hacker-text"); 
-                }
-            });
-        }
-
-        function updateMonthly(type) {
-            document.querySelectorAll('#monthlyBtns button').forEach(b => b.classList.remove('active'));
-            document.querySelector(`#monthlyBtns button[onclick="updateMonthly('${type}')"]`).classList.add('active');
-            const container = document.getElementById('monthlyList');
-            container.innerHTML = "";
-            const data = MONTHLY_DATA_CACHE[type];
-            if(!data) return;
-            const months = ["Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"].reverse();
-            const maxVal = Math.max(...Object.values(data));
-            months.forEach(m => {
-                const val = data[m] || 0;
-                const percent = maxVal > 0 ? (val / maxVal) * 100 : 0;
-                let color = "bg-zinc-700";
-                if(type === 'views') color = "bg-red-600";
-                if(type === 'likes') color = "bg-amber-500";
-                if(type === 'comments') color = "bg-blue-500";
-                container.innerHTML += `
-                    <div class="mb-1">
-                        <div class="flex justify-between text-[11px] mb-1 hacker-target">
-                            <span class="font-bold text-zinc-400">${m}</span>
-                            <span class="text-zinc-200 font-mono">${formatNum(val)}</span>
-                        </div>
-                        <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                            <div class="h-full ${color}" style="width: ${percent}%"></div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function updateWeekly(type) {
-            document.querySelectorAll('#weeklyBtns button').forEach(b => b.classList.remove('active'));
-            document.querySelector(`#weeklyBtns button[onclick="updateWeekly('${type}')"]`).classList.add('active');
-             const ctx = document.getElementById('growthChart').getContext('2d');
-            let color = "#ef4444", data = WEEKLY_DATA_CACHE.views;
-            if(type === 'likes') { color = "#f59e0b"; data = WEEKLY_DATA_CACHE.likes; }
-            if(type === 'comments') { color = "#3b82f6"; data = WEEKLY_DATA_CACHE.comments; }
-            if(GROWTH_CHART) GROWTH_CHART.destroy();
-            GROWTH_CHART = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: WEEKLY_DATA_CACHE.labels,
-                    datasets: [{
-                        label: type.toUpperCase(),
-                        data: data,
-                        borderColor: color,
-                        backgroundColor: (context) => {
-                            const bg = context.chart.ctx.createLinearGradient(0, 0, 0, 300);
-                            bg.addColorStop(0, color + '66'); 
-                            bg.addColorStop(1, color + '00');
-                            return bg;
-                        },
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true,
-                        pointRadius: 3
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#27272a' } } } }
-            });
-        }
-
-        function formatNum(n) {
-            if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
-            if (n >= 1000) return (n/1000).toFixed(1) + 'K';
-            return n;
-        }
-
-        function renderTikTokCharts() {
-            new Chart(document.getElementById('ttGenderChartSeparate'), {
-                type: 'pie',
-                data: { labels: ['Kadın', 'Erkek'], datasets: [{ data: [64, 36], backgroundColor: ['#FE2C55', '#25F4EE'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-        }
-
-        // Initialize
-        fetchData();
-        renderTikTokCharts();
-        renderInstagramData();
     </script>
 </body>
 </html>
